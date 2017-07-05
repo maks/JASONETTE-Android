@@ -27,6 +27,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -429,6 +430,18 @@ public class JasonViewActivity extends AppCompatActivity {
         savedInstanceState.putParcelable("listState", listState);
 
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_B:
+                startActivity(new Intent("jasonette.builder"));
+                return true;
+            default:
+                return super.onKeyUp(keyCode, event);
+        }
     }
 
 

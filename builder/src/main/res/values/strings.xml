@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Builder</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="drawer_item_header">Header</string>
+    <string name="drawer_item_body">Body</string>
+    <string name="builder_head_app_name_label">App Name</string>
+</resources>
