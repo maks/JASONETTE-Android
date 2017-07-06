@@ -15,6 +15,11 @@ android {
         vectorDrawables.useSupportLibrary = true
 
     }
+
+    dataBinding {
+        enabled = true
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -35,5 +40,6 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.9.4@aar') {
         transitive = true
     }
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.3'
     testCompile 'junit:junit:4.12'
 }

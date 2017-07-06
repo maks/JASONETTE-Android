@@ -7,4 +7,10 @@
     <string name="builder_head_app_name_label">App Name</string>
     <string name="drawer_item_actions">actions</string>
     <string name="default_app_title">New App</string>
+    <string name="head_title_label">Title</string>
+    <string name="head_description_label">Description</string>
+    <string name="head_icon_label">Icon</string>
+    <string name="drawer_item_templates">templates</string>
+    <string name="drawer_item_styles">styles</string>
+    <string name="drawer_item_footer">footer</string>
 </resources>

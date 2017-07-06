@@ -91,9 +91,13 @@ public class BuilderActivity extends AppCompatActivity {
     void navDrawer() {
         PrimaryDrawerItem headerItem = new PrimaryDrawerItem().
                 withIdentifier(HEADER_ITEM_ID).withName(R.string.drawer_item_header);
+        SecondaryDrawerItem stylesItem = new SecondaryDrawerItem().withName(R.string.drawer_item_styles);
         SecondaryDrawerItem actionsItem = new SecondaryDrawerItem().withName(R.string.drawer_item_actions);
+        SecondaryDrawerItem templatesItem = new SecondaryDrawerItem().withName(R.string.drawer_item_templates);
+
         PrimaryDrawerItem bodyItem = new PrimaryDrawerItem().
                 withIdentifier(BODY_ITEM_ID).withName(R.string.drawer_item_body);
+        SecondaryDrawerItem footerItem = new SecondaryDrawerItem().withName(R.string.drawer_item_footer);
 
         //create the drawer for building
         Drawer result = new DrawerBuilder()
@@ -101,14 +105,19 @@ public class BuilderActivity extends AppCompatActivity {
             .withToolbar(toolbar)
             .addDrawerItems(
                     headerItem,
+                    stylesItem,
                     actionsItem,
+                    templatesItem,
                     new DividerDrawerItem(),
-                    bodyItem
+                    bodyItem,
+                    footerItem
             )
             .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                 @Override
                 public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                     Timber.d("clicked drawer item %s", drawerItem);
+                    Snackbar.make(view, "Show "+drawerItem, Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                     return true;
                 }
             })
