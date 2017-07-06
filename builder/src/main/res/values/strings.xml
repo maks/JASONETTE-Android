@@ -5,4 +5,6 @@
     <string name="drawer_item_header">Header</string>
     <string name="drawer_item_body">Body</string>
     <string name="builder_head_app_name_label">App Name</string>
+    <string name="drawer_item_actions">actions</string>
+    <string name="default_app_title">New App</string>
 </resources>

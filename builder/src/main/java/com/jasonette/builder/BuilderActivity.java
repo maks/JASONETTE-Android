@@ -10,10 +10,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.jasonette.builder.model.JasonModel;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import timber.log.Timber;
@@ -25,6 +27,8 @@ public class BuilderActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
 
+    private JasonModel jasonModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,9 +37,14 @@ public class BuilderActivity extends AppCompatActivity {
             Timber.plant(new Timber.DebugTree());
         }
 
+        if (jasonModel == null) {
+            jasonModel = new JasonModel(getString(R.string.default_app_title));
+        }
+
         setContentView(R.layout.activity_builder);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        setTitle(jasonModel.getHead().getTitle());
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -45,6 +54,7 @@ public class BuilderActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        navDrawer();
     }
 
     @Override
@@ -73,36 +83,35 @@ public class BuilderActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_B:
-                builderMode();
-                return true;
             default:
                 return super.onKeyUp(keyCode, event);
         }
     }
 
-    void builderMode() {
+    void navDrawer() {
         PrimaryDrawerItem headerItem = new PrimaryDrawerItem().
                 withIdentifier(HEADER_ITEM_ID).withName(R.string.drawer_item_header);
+        SecondaryDrawerItem actionsItem = new SecondaryDrawerItem().withName(R.string.drawer_item_actions);
         PrimaryDrawerItem bodyItem = new PrimaryDrawerItem().
                 withIdentifier(BODY_ITEM_ID).withName(R.string.drawer_item_body);
 
         //create the drawer for building
         Drawer result = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .addDrawerItems(
-                        headerItem,
-                        new DividerDrawerItem(),
-                        bodyItem
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        Timber.d("clicked drawer item %s", drawerItem);
-                        return true;
-                    }
-                })
-                .build();
+            .withActivity(this)
+            .withToolbar(toolbar)
+            .addDrawerItems(
+                    headerItem,
+                    actionsItem,
+                    new DividerDrawerItem(),
+                    bodyItem
+            )
+            .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                @Override
+                public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                    Timber.d("clicked drawer item %s", drawerItem);
+                    return true;
+                }
+            })
+            .build();
     }
 }
