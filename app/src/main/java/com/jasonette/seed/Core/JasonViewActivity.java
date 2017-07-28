@@ -25,7 +25,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -75,12 +74,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import timber.log.Timber;
+
 import static com.bumptech.glide.Glide.with;
 
 public class JasonViewActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private RecyclerView listView;
-    public String url;
+    protected String url;
     public JasonModel model;
     private ProgressBar loading;
 
@@ -311,7 +312,6 @@ public class JasonViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
-
         super.onPause();
     }
 
@@ -381,13 +381,11 @@ public class JasonViewActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
-
         super.onResume();
 
         if (listState != null) {
             listView.getLayoutManager().onRestoreInstanceState(listState);
         }
-
     }
 
 
@@ -745,9 +743,8 @@ public class JasonViewActivity extends AppCompatActivity {
                             resolved_classname = jrjson.getString("classname");
                         }
                     } catch (Exception e) {
-                        Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+                        Timber.e(e);
                     }
-
 
                     if(resolved_classname != null) {
                         fileName = "com.jasonette.seed.Action." + resolved_classname;
@@ -776,14 +773,10 @@ public class JasonViewActivity extends AppCompatActivity {
                     model.action = action;
                     method.invoke(module, action, model.state, event, context);
                 }
-
-
             }
         } catch (Exception e){
-            // Action doesn't exist yet
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            Timber.d("Action doesn't exist yet");
             try {
-
                 JSONObject alert_action = new JSONObject();
                 alert_action.put("type", "$util.banner");
 
@@ -794,11 +787,9 @@ public class JasonViewActivity extends AppCompatActivity {
 
                 alert_action.put("options", options);
 
-
                 call(alert_action.toString(), new JSONObject().toString(), "{}", JasonViewActivity.this);
-
             } catch (Exception e2){
-                Log.d("Warning", e2.getStackTrace()[0].getMethodName() + " : " + e2.toString());
+                Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
             }
         }
     }
@@ -1160,7 +1151,7 @@ public class JasonViewActivity extends AppCompatActivity {
                             JSONArray ret = new JSONArray();
                             for (int i = 0; i < ((JSONArray)val).length(); i++) {
                                 String url = ((JSONArray) val).getString(i);
-                                ret.put(refs.get(url));
+                                ret.put(JasonHelper.resolveUrl(refs.get(url).toString(), this).toString());
                             }
                             res.put(key, ret);
                         } else if(val instanceof String){
@@ -1219,7 +1210,7 @@ public class JasonViewActivity extends AppCompatActivity {
             JasonParser.getInstance(this).parse(type, data, template, context);
 
         } catch (Exception e){
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            Timber.w(e);
             JasonHelper.next("error", action, new JSONObject(), event, context);
         }
     }
@@ -1248,6 +1239,9 @@ public class JasonViewActivity extends AppCompatActivity {
                 // "view": "web"
                 if (action.getJSONObject("options").has("view")) {
                     String view_type = action.getJSONObject("options").getString("view");
+
+                    url = !view_type.equalsIgnoreCase("app") ? JasonHelper.resolveUrl(url, this).toString() : url;
+
                     if(view_type.equalsIgnoreCase("web") || view_type.equalsIgnoreCase("app")){
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(url));
@@ -1832,7 +1826,7 @@ public class JasonViewActivity extends AppCompatActivity {
                 }
                 style.put("height", "25");
                 if(json.has("image")) {
-                    json.put("url", json.getString("image"));
+                    json.put("url", JasonHelper.resolveUrl(json.getString("image"), this).toString());
                 }
                 json.put("type", "button");
                 json.put("style", style);
@@ -1877,7 +1871,7 @@ public class JasonViewActivity extends AppCompatActivity {
                     json.put("text", "Send");
                 }
                 if(json.has("image")) {
-                    json.put("url", json.getString("image"));
+                    json.put("url", JasonHelper.resolveUrl(json.getString("image"), this).toString());
                 }
                 style.put("height", "25");
 
@@ -2060,7 +2054,7 @@ public class JasonViewActivity extends AppCompatActivity {
                             call(item.get("action").toString(), "{}", "{}", JasonViewActivity.this);
                             return false;
                         } else if(item.has("url")) {
-                            String url = item.getString("url");
+                            String url = JasonHelper.resolveUrl(item.getString("url"), JasonViewActivity.this).toString();
                             JSONObject action = new JSONObject();
                             JSONObject options = new JSONObject();
                             options.put("url", url);
@@ -2145,7 +2139,7 @@ public class JasonViewActivity extends AppCompatActivity {
         try {
             menu = toolbar.getMenu();
             if (model.rendered != null) {
-                JSONObject header = model.rendered.getJSONObject("header");
+                JSONObject header = model.rendered.optJSONObject("header");
 
                 header_height = toolbar.getHeight();
                 setup_title(header);
@@ -2469,5 +2463,9 @@ public class JasonViewActivity extends AppCompatActivity {
             listView.removeOnItemTouchListener(listener);
             listViewOnItemTouchListeners.remove(listener);
         }
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

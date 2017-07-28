@@ -21,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.regex.Matcher;
@@ -401,6 +403,24 @@ public class JasonHelper {
             Timber.e(e, "wasn't able to preserve stack for action: %s", action);
             return callback;
         }
+    }
+
+    /**
+     * Resolve Urls that maybe relative to a base, root url as provided by the context.
+     *
+     * @param url
+     * @param context
+     * @return
+     * @throws MalformedURLException
+     */
+    public static URL resolveUrl(String url, Context context) throws MalformedURLException {
+        // assume relative
+        if (url.startsWith("/")) {
+            URL resolvedUrl =  new URL(new URL(((JasonViewActivity)context).getUrl()), url);
+            return resolvedUrl;
+        }
+        // Validate the URL
+        return new URL(url);
     }
 
 }
