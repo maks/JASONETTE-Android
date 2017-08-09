@@ -3,7 +3,9 @@ package com.jasonette.seed.Core;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -73,6 +75,8 @@ public class JasonParser {
 //                        return super.onConsoleMessage(consoleMessage);
 //                    }
 //                });
+                mWebview.setWebChromeClient(new WebChromeClient());
+
 
                 mWebview.setWebViewClient(new WebViewClient(){
                     public void onPageFinished(WebView view, String url){
@@ -80,6 +84,21 @@ public class JasonParser {
                         instance.mWebviewReadyLatch.countDown();
                     }
                 });
+
+                class Callback {
+                    @JavascriptInterface
+                    public void callback(String value) {
+                        try {
+                            if (value != null) {
+                                value = value.replaceAll("^\"|\"$", "").replace("\\\"", "\"");
+                            }
+                            instance.listener.onFinished((value != null && !"null".equals(value)) ? new JSONObject(value) : null);
+                        } catch (Exception e) {
+                            Timber.e(e);
+                        }
+                    }
+                }
+                mWebview.addJavascriptInterface(new Callback(), "Callback");
 
                 mWebview.loadDataWithBaseURL(ASSETS_URL_PREFIX, html, TEXT_MIME_TYPE, "utf-8", HISTORY_URL);
             } catch (Exception e){
@@ -150,8 +169,8 @@ public class JasonParser {
                      * To then call back to Java you would need to use addJavascriptInterface()
                      * and have your JS call the interface
                      **/
-//                mWebview.loadUrl("javascript:"+javascript);
-                    throw new UnsupportedOperationException("Support for Pre-KitKat pending");
+
+                    mWebview.loadUrl("javascript:parser.inject('JASON', window.Callback); " + script);
                 }
             }
         });
