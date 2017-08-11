@@ -5,16 +5,23 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.jasonette.seed.Core.JSEngineHelper;
 import com.jasonette.seed.Core.JasonViewActivity;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import timber.log.Timber;
 
 
 public class JasonHtmlComponent {
+
+    private static final String JASON_BRIDGE_JS_NAME = "JASON";
 
     public static View build(View view, final JSONObject component, final JSONObject parent, final Context context) {
         if(view == null){
@@ -49,6 +56,7 @@ public class JasonHtmlComponent {
                 settings.setAppCacheEnabled( true );
                 settings.setCacheMode( WebSettings.LOAD_DEFAULT );
 
+                ((WebView) view).addJavascriptInterface(new JasonWebviewBridge((WebView) view), JASON_BRIDGE_JS_NAME);
 
                 // not interactive by default;
                 Boolean responds_to_webview = false;
@@ -119,5 +127,26 @@ public class JasonHtmlComponent {
             }
         }
         return new View(context);
+    }
+
+    static class JasonWebviewBridge {
+
+        private final WebView mWebView;
+
+        public JasonWebviewBridge(WebView view) {
+            mWebView = view;
+        }
+
+        @JavascriptInterface
+        public void call(String action) {
+            Timber.d("Webview JS called %s", action);
+            action = action.replaceAll("^\"|\"$", ""); //strip enclosing double quotes
+            Context activityContext = mWebView.getContext();
+            if (activityContext instanceof JasonViewActivity) {
+                ((JasonViewActivity) mWebView.getContext()).call(action, new JSONObject().toString(), "{}", mWebView.getContext());
+            } else {
+                Timber.e("Cannot call Action from Webview, it does not have an Activity Context");
+            }
+        }
     }
 }
